@@ -1,7 +1,10 @@
 //First Exercise
 
         // 1. Add two more whole numbers to this list using .add()
-        List<Integer> numberList = new List<Integer>{ 0, 1, 1, 2, 3, 5, 8, 13, 21, 34 };
+        //List<Integer> numberList = new List<Integer>{ 0, 1, 1, 2, 3, 5, 8, 13, 21, 34 };
+
+numberList.add('12');
+numberList.add('18');
 
         //Checking our work:
         System.debug('This number should be 12: ' + numberList.size());
@@ -10,6 +13,12 @@
         // 2. Create a new Lead and insert it in the database. (If you're stuck, look back at the WeekThreeClassExercises class for an example of creating a new SObject Record)
         //You can give it any values you like, but remember that last name and Company are required fields (both are simple text fields.)
 
+ Lead newLead = new Lead(
+      a.FirstName = 'Peter',
+      a.LastName = 'Parker',
+      a.Company = 'Marvel',
+
+Insert newLead;
 
         //Checking our work:
         System.debug('We should see One DML was executed: ' + Limits.getDMLRows());
@@ -23,7 +32,9 @@
 
     // using for loop syntax, loop over the list of strings, printing each one out to the debug log.
 
-
+(String color : myStringList) {
+  System.debug('The Colour is: ' + colour);
+}
     // 2. How about some SObjects?
 
     // I'll do the data setup here to create a list of contacts that all have a first name:
@@ -35,9 +46,14 @@
     // Your turn!  Using a for loop, print out the first name of each contact on a different line
     //hint, you will need to use dot notation!
 
+(Contact contact : myContacts) {
+  System.debug('In the Loop:' + contact.FirstName);
+}
 
     //Bonus question to ponder: Do these contacts actually exist in our database?
     //What would it take to get them there?
+
+Insert contact;
 
   }
 }
