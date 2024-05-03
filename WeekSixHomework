@@ -1,0 +1,79 @@
+public with sharing class WeekSixHomework {
+// Remember Sets & Maps?? We did a little practice with Lists in week 2, but we need to make sure we know how to use Sets & Maps as well!!
+
+public static void setsReview(){
+
+    //Your assignment: Play with Sets!
+
+    // 1.  Create a set of Strings and add at least 5 entries
+Set Fruits = new Set();
+
+// Add elements to the set
+fruits.add('Apple');
+fruits.add('Banana');
+fruits.add('Lemon');
+fruits.add('Orange');
+fruits.add('Pear');
+
+    //Use System.debug to print out the size of your set
+System.debug('Fruits set: ' + Fruits);
+
+    //Add an item to your set that already exists
+fruits.add('Apple');
+
+    //Use System.debug to print out the size again,  they should be the same!
+System.debug('Number of Fruits (after adding duplicate): ' + Fruits.size());
+
+    // 2.  Bonus Points!  Check out the documentation on Sets. Go to the section titled Set Methods. Pick one of the methods to try out and print the results to the debug log.  
+    // Documentation: https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_set.htm
+    //Hint:  can you print out a boolean that indicates if the set is empty?  Can you clone it?
+Set myString = new Set{'a', 'b'};
+Boolean result = myString.contains('z');
+System.assertEquals(false, result);
+}
+
+public static void mapsReview () {
+
+    //Time to get creative!  
+
+    // 1. Create a new Map.  You can use whatever primitives/object types you like, as long as they make sense.
+    // Try to add at least 5 Key/value pairs.
+Map<String, Integer> FruitCount = new Map<String, Integer>();
+
+// Add key-value pairs to the map
+FruitCount.put('Apple', 5);
+FruitCount.put('Canana', 3);
+FruitCount.put('Lemon', 10);
+FruitCount.put('Orange', 2);
+FruitCount.put('Pear', 1);
+
+    //Now, in the debug log, print out  a list of the values.
+System.debug('List of Fruit: ' + FruitCountValues);
+
+    //Can you print out a set of the Keys?
+System.debug('Set of fruit names (keys): ' + FruitNames);
+
+    // 2. Bonus!  Check out the documentation on Maps. Go to the section titled Map Methods.  Manipulate the Map using one of the methods defined in the documentation
+    // Documentation: https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_map.htm
+    // Hint: Can you remove an entry using the key?  Can you clear out the map without deleting it?
+
+
+}
+
+public static void listsReview() {
+
+    // 1. Create a list of Strings.  Add at least 5 entries to the list, all in one line
+List Colours = new List{'Red', 'Blue', 'Green', 'Yellow', 'Orange'};
+
+    // 2. Create a second list of Strings and add 5 or more entries to this list.
+List Days = new List{'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'};
+
+    //3.  Bonus! Using the documentation on standard List methods from Salesforce, add the items from your first list, to your second list with one command
+    // Documentation: https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_list.htm
+Colours.addAll(Days);
+
+    //4.  Can you now loop through your combined list and print it to the debug log?  (Hint:  Check the documentation!)
+System.debug('Colours after adding Days: ' + Colour);
+}
+
+}
