@@ -1,0 +1,76 @@
+  //Bulkifying Trigger Handler AfterInsert
+
+ public static void handleAfterInsert(List<Account> newAccounts){
+        
+        Id runningUserId = UserInfo.getUserId();
+        //retreive the running user information
+        User u = [SELECT Id, Email FROM User WHERE Id = :runningUserId];
+        
+        //Create a list for the new cases 
+        List<Case> newCases = new List<Case>();
+        //Create the new cases for the accounts in newAccounts
+        for (Account a : newAccounts) {
+            Case c = new Case();
+            c.Status = 'New';
+            c.Origin = 'New Account'; //Make sure you've added this as a picklist value for this field
+            c.Subject = 'Send Welcome Package';
+            c.AccountId = a.Id;
+            c.Description = 'Please follow up with this new Account and send them a Welcome Package.';
+            c.Staff_Email_Address__c = u.email;
+           //add the new cases to the case list
+            newCases.add(c);
+        }
+            insert newCases;
+    }
+    }
+
+//OpportunityTriggerHandler
+
+public with sharing class OpportunityTriggerHandler {
+
+    public static void onBeforeInsert(List<Opportunity> newOpportunities) {
+    
+        Set<Id> accountIds = new Set<Id>();
+    	for (Opportunity opp : newOpportunities) {
+        accountIds.add(opp.AccountId);
+    }
+    //Now we can get the map
+    Map<Id, Account> accountMap = new Map<Id, Account>([SELECT Id, Rating FROM Account WHERE Id IN :accountIds]);
+
+    //Finally, a set to hold any accounts we're updating (we use a set, because it's possible to have multiple opportunities being
+    //inserted for an account and they would then get added to the list twice.  We'll convert this set back to a list before doing DML )
+    Set<Account> updatedAccountsSet = new Set<Account>();
+
+    //ok, now we loop through and update as needed
+    for (Opportunity opp : newOpportunities) {
+        //get the account record for this opportunity
+        Account acct = accountMap.get(opp.AccountId);
+        if (acct.Rating != 'Hot') {
+            acct.Rating = 'Hot';
+            updatedAccountsSet.add(acct);
+        }
+    }
+
+    if (updatedAccountsSet.size() > 0) {
+        //convert the set to a list for DML
+        List<Account> updatedAccounts = new List<Account>();
+        //Add all the accounts from the set into our list
+        updatedAccounts.addAll(updatedAccountsSet);
+        update updatedAccounts;
+    }
+    }	
+}
+
+//Bonus 
+
+trigger OpportunityTrigger on Opportunity (before insert) {
+    
+    
+     if(Trigger.isInsert){
+         if(Trigger.isbefore){
+     OpportunityTriggerHandler.onBeforeInsert(Trigger.new);
+     }
+     }     
+    //space for future triggers
+
+}
