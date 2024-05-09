@@ -3,7 +3,7 @@
  public static void handleAfterInsert(List<Account> newAccounts){
         
         Id runningUserId = UserInfo.getUserId();
-        //retreive the running user information
+        //retreive the running user 
         User u = [SELECT Id, Email FROM User WHERE Id = :runningUserId];
         
         //Create a list for the new cases 
@@ -12,17 +12,18 @@
         for (Account a : newAccounts) {
             Case c = new Case();
             c.Status = 'New';
-            c.Origin = 'New Account'; //Make sure you've added this as a picklist value for this field
+            c.Origin = 'New Account';
             c.Subject = 'Send Welcome Package';
             c.AccountId = a.Id;
             c.Description = 'Please follow up with this new Account and send them a Welcome Package.';
             c.Staff_Email_Address__c = u.email;
-           //add the new cases to the case list
+           //add the cases to the list
             newCases.add(c);
         }
             insert newCases;
     }
     }
+
 
 //OpportunityTriggerHandler
 
@@ -34,7 +35,6 @@ public with sharing class OpportunityTriggerHandler {
     	for (Opportunity opp : newOpportunities) {
         accountIds.add(opp.AccountId);
     }
-    //Now we can get the map
     Map<Id, Account> accountMap = new Map<Id, Account>([SELECT Id, Rating FROM Account WHERE Id IN :accountIds]);
 
     //Finally, a set to hold any accounts we're updating (we use a set, because it's possible to have multiple opportunities being
