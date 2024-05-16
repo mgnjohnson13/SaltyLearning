@@ -1,35 +1,49 @@
-//TriggerHandler
 
 public with sharing class StockItemTriggerHandler {
 
-  public static void onBeforeInsert(List<Stock_Item__c> newStockItems) {
-    Set<String> existingItemNames = new Set<String>();
-    for (Select Item_Name__c from Stock_Item__c where Item_Name__c IN :newStockItems) {
-      existingItemNames.add(Item_Name__c);
-    }
+    // Before Inserting New Stock Items
+    public static void onBeforeInsert(List<Stock_Item__c> newStockItems) {
+        Set<String> existingItemNames = new Set<String>();
+        
+        // Query existing Stock Items records to populate the set with item names
+        for (Stock_Item__c existingItem : [SELECT Item_Name__c FROM Stock_Item__c WHERE Item_Name__c IN :newStockItems]) {
+            existingItemNames.add(existingItem.Item_Name__c);
+        }
 
-    for (Stock_Item__c newItem : newStockItems) {
-      if (existingItemNames.contains(newItem.Item_Name__c)) {
-        throw new DuplicateItemNameException('Item' + newItem.Item_Name__c + 'already exsists.' + Select a new Item Name.');
-      }
-    }
-  }
-
- public static void onBeforeDelete(List<Stock_Item__c> stockItemsToDelete) {
-    List<Case> newCases = new List<Case>();
-    for (Stock_Item__c deletedItem : stockItemsToDelete) {
-        if (deletedItem.Stock_On_Hand__c > 0) {
-            Case c = new Case();
-            c.Status = 'New';
-            c.Subject = 'Updated Stock On Hand';
-            c.Description = 'Stock Item ' + deletedItem.Item_Name__c + ' has ' + deletedItem.Stock_On_Hand__c + ' items remaining in stock.';
-            //Case Owner can be determined based on Case Assignment Rules 
-            newCases.add(c);
+        // Check for duplicate item names in newStockItems
+        for (Stock_Item__c newItem : newStockItems) {
+            if (existingItemNames.contains(newItem.Item_Name__c)) {
+                // Update the name of item to reflect that one already exsists
+                newItem.Item_Name__c += 'duplicate item';
+            }
         }
     }
 
-    if (!newCases.isEmpty()) {
-        insert newCases;
+    // Before deleting Stock Item records
+    public static void onBeforeDelete(List<Stock_Item__c> stockItemsToDelete) {
+        List<Case> newCases = new List<Case>();
+        
+        // Iterate through Stock Items to be deleted
+        for (Stock_Item__c deletedItem : stockItemsToDelete) {
+            // Check if stock on hand is greater than 0
+            if (deletedItem.Stock_On_Hand__c > 0) {
+                // Create a new Case
+                Case c = new Case();
+                c.Status = 'New';
+                c.Subject = 'Updated Stock On Hand';
+                c.Description = 'Stock Item ' + deletedItem.Item_Name__c + ' has ' + deletedItem.Stock_On_Hand__c + ' items remaining in stock.';
+                // Case Owner can be determined based on Case Assignment Rules 
+                newCases.add(c);
+            }
+        }
+        
+        // Insert new Case records if the list is not empty
+        if (!newCases.isEmpty()) {
+            insert newCases;
+        }
     }
 }
-}
+
+
+
+
