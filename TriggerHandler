@@ -10,35 +10,26 @@ public with sharing class StockItemTriggerHandler {
 
     for (Stock_Item__c newItem : newStockItems) {
       if (existingItemNames.contains(newItem.Item_Name__c)) {
-        throw new DuplicateItemNameException('Another item is called ' + newItem.Item_Name__c + '. Please choose another name.');
+        throw new DuplicateItemNameException('Item' + newItem.Item_Name__c + 'already exsists.' + Select a new Item Name.');
       }
     }
   }
 
-  public static void onBeforeDelete(List<Stock_Item__c> stockItemsToDelete) {
+ public static void onBeforeDelete(List<Stock_Item__c> stockItemsToDelete) {
     List<Case> newCases = new List<Case>();
-    ID runningUserID = UserInfo.getuserId();
-    User currentUser = [Select ID, Email From User WHERE Id = :runningUserID];
-
     for (Stock_Item__c deletedItem : stockItemsToDelete) {
-      if (deletedItem.Stock_On_Hand__c > 0) {
-        Case c = new Case();
-        c.Status = 'New';
-        c.Subject = 'Item deleted with remaining stock';
-        c.Description = 'Stock Item ' + deletedItem.Item_Name__c + ' (ID: ' + deletedItem.ID + ') has ' + deletedItem.Stock_On_Hand__c + ' remaining stock on hand.';
-        c.OwnerId = runningUserID;
-        newCases.add(c);
-      }
+        if (deletedItem.Stock_On_Hand__c > 0) {
+            Case c = new Case();
+            c.Status = 'New';
+            c.Subject = 'Updated Stock On Hand';
+            c.Description = 'Stock Item ' + deletedItem.Item_Name__c + ' has ' + deletedItem.Stock_On_Hand__c + ' items remaining in stock.';
+            //Case Owner can be determined based on Case Assignment Rules 
+            newCases.add(c);
+        }
     }
 
     if (!newCases.isEmpty()) {
-      insert newCases;
+        insert newCases;
     }
-  }
-
-  public static class DuplicateItemNameException extends Trigger.DmlException {
-    public DuplicateItemNameException(String message) {
-      super(message);
-    }
-  }
+}
 }
