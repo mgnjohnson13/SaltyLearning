@@ -4,7 +4,7 @@ public with sharing class StockItemTriggerHandler {
     public static void onBeforeInsert(List<Stock_Item__c> newStockItems) {
         Set<String> existingItemNames = new Set<String>();
         
-        // Query existing Stock Items records to populate the set with item names
+        // Get a list of the exsisting Stock Item Names
         for (Stock_Item__c existingItem : [SELECT Item_Name__c FROM Stock_Item__c WHERE Item_Name__c IN :newStockItems]) {
             existingItemNames.add(existingItem.Item_Name__c);
         }
@@ -12,7 +12,7 @@ public with sharing class StockItemTriggerHandler {
         // Check for duplicate item names in newStockItems
         for (Stock_Item__c newItem : newStockItems) {
             if (existingItemNames.contains(newItem.Item_Name__c)) {
-                // Update the name of item to reflect that one already exists
+                // If duplicates are found, update the name of the new item to reflect that one already exists
                 newItem.Item_Name__c += 'duplicate item';
             }
         }
@@ -42,11 +42,11 @@ public with sharing class StockItemTriggerHandler {
         }
     }
 
-    // Method to get stock items with low stock
+    // List of Stock Items with Low Stock
     public static List<Stock_Item__c> getLowStockItems() {
         List<Stock_Item__c> lowStockItems = new List<Stock_Item__c>();
         
-        // Query for stock items with stock on hand at or below minimum stock level
+        // Return list of stock items with stock on hand at or below minimum stock level
         for (Stock_Item__c item : [SELECT Id, Item_Name__c, Item_Stock_is_Low__c, Minimum_Stock_Level__c, Stock_On_Hand__c 
                                    FROM Stock_Item__c WHERE Stock_On_Hand__c <= Minimum_Stock_Level__c]) {
             lowStockItems.add(item);
