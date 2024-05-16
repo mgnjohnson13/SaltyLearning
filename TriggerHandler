@@ -3,8 +3,8 @@ public with sharing class StockItemTriggerHandler {
     // Before Inserting New Stock Items
     public static void onBeforeInsert(List<Stock_Item__c> newStockItems) {
         Set<String> existingItemNames = new Set<String>();
-        
-        // Get a list of the exsisting Stock Item Names
+
+        // Get a list of existing Stock Item Names
         for (Stock_Item__c existingItem : [SELECT Item_Name__c FROM Stock_Item__c WHERE Item_Name__c IN :newStockItems]) {
             existingItemNames.add(existingItem.Item_Name__c);
         }
@@ -21,21 +21,25 @@ public with sharing class StockItemTriggerHandler {
     // Before deleting Stock Item records
     public static void onBeforeDelete(List<Stock_Item__c> stockItemsToDelete) {
         List<Case> newCases = new List<Case>();
-        
-        // Iterate through Stock Items to be deleted
+
+        // Collect the names of Stock Items to be deleted with stock on hand greater than 0
+        Set<String> itemNamesWithStock = new Set<String>();
         for (Stock_Item__c deletedItem : stockItemsToDelete) {
-            // Check if stock on hand is greater than 0
             if (deletedItem.Stock_On_Hand__c > 0) {
-                // Create a new Case
-                Case c = new Case();
-                c.Status = 'New';
-                c.Subject = 'Updated Stock On Hand';
-                c.Description = 'Stock Item ' + deletedItem.Item_Name__c + ' has ' + deletedItem.Stock_On_Hand__c + ' items remaining in stock.';
-                // Case Owner can be determined based on Case Assignment Rules 
-                newCases.add(c);
+                itemNamesWithStock.add(deletedItem.Item_Name__c);
             }
         }
-        
+
+        // Create new Case records for items with stock on hand
+        for (String itemName : itemNamesWithStock) {
+            Case c = new Case();
+            c.Status = 'New';
+            c.Subject = 'Updated Stock On Hand';
+            c.Description = 'Stock Item ' + itemName + ' has items remaining in stock.';
+            // Case Owner can be determined based on Case Assignment Rules
+            newCases.add(c);
+        }
+
         // Insert new Case records if the list is not empty
         if (!newCases.isEmpty()) {
             insert newCases;
@@ -45,13 +49,13 @@ public with sharing class StockItemTriggerHandler {
     // List of Stock Items with Low Stock
     public static List<Stock_Item__c> getLowStockItems() {
         List<Stock_Item__c> lowStockItems = new List<Stock_Item__c>();
-        
-        // Return list of stock items with stock on hand at or below minimum stock level
+
+        // Retrieve list of stock items with stock on hand at or below minimum stock level
         for (Stock_Item__c item : [SELECT Id, Item_Name__c, Item_Stock_is_Low__c, Minimum_Stock_Level__c, Stock_On_Hand__c 
                                    FROM Stock_Item__c WHERE Stock_On_Hand__c <= Minimum_Stock_Level__c]) {
             lowStockItems.add(item);
         }
-        
+
         return lowStockItems;
     }
 }
